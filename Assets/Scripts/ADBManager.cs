@@ -1,15 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
 public class ADBManager : MonoBehaviour
@@ -87,9 +82,9 @@ public class ADBManager : MonoBehaviour
         // if (AppIds.Contains(Application.identifier)) appId = Application.identifier;
         // else appId = AppIds[0];
 
-        apkPath = ADBManager.LastBuiltApk;
-        PopulateDropdown(appsDropdown,AppIds);
-        print("CurrentSelectedAPP "+ appId);
+        apkPath = LastBuiltApk;
+        PopulateDropdown(appsDropdown, AppIds);
+        print("CurrentSelectedAPP " + appId);
     }
 
     public static Process ExecuteCommand(string command)
@@ -98,10 +93,10 @@ public class ADBManager : MonoBehaviour
         string fileName = "cmd.exe";
         string arguments = $"/C {command.Trim()}";
 
-#if UNITY_EDITOR_OSX
-            var firstSpace = command.IndexOf(' ') + 1;
-            fileName = command.Substring(0, firstSpace).Trim();
-            arguments = $"{command.Substring(firstSpace).Trim()}";
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        var firstSpace = command.IndexOf(' ') + 1;
+        fileName = command.Substring(0, firstSpace).Trim();
+        arguments = $"{command.Substring(firstSpace).Trim()}";
 #endif
 
         Process cmd = new Process();
@@ -148,10 +143,11 @@ public class ADBManager : MonoBehaviour
     private void WriteLine(string text) => console = _builder.AppendLine(text).ToString();
     private void ScrollToLast() => ScrollPos.y = float.MaxValue;
     private void Clear() => console = _builder.Clear().ToString();
-    
-    private void PopulateDropdown (TMP_Dropdown dropdown, string[] optionsArray) {
+
+    private void PopulateDropdown(TMP_Dropdown dropdown, string[] optionsArray)
+    {
         var options = optionsArray.ToList();
-        dropdown.ClearOptions ();
+        dropdown.ClearOptions();
         dropdown.AddOptions(options);
     }
 
@@ -159,23 +155,28 @@ public class ADBManager : MonoBehaviour
     {
         OpenApp(appId);
     }
+
     public void CloseAppButton()
     {
         CloseApp(appId);
     }
+
     public void ResetAppButton()
     {
         ResetApp(appId);
     }
+
     public void UninstallAppButton()
     {
         UninstallApp(appId);
     }
+
     private async void UninstallApp(string packageId)
     {
         var output = await GetOutput(ExecuteCommand($"{ADB} uninstall {packageId}"));
         Debug.Log(output);
     }
+
     private async void OpenApp(string packageId)
     {
         var output =
